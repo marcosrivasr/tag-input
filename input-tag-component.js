@@ -10,10 +10,9 @@ class InputTag extends HTMLElement{
             font-size: 14px;
             display: inline-block;
             border: solid 1px #000;
-            padding: 5px 0;
         }
         .tag-input-container .data-tag-container{
-            display: inline;
+            display: inline-block;
         }
         .tag-input-container .data-tag-container .data-tag{
             display: inline-block;
@@ -54,8 +53,6 @@ class InputTag extends HTMLElement{
 
         shadowRoot.appendChild(this.tagInputContainer);
 
-        
-
         this.tagInput.addEventListener('keyup', e=>{
             const value = this.tagInput.value;
             if(e.key == 'Enter' && !this.exists(value)){
@@ -76,8 +73,6 @@ class InputTag extends HTMLElement{
 
     set value(data){
         this.setAttribute('value', data);
-        this.data = data.split(',');
-        this.showData();
     }
 
     get value(){
@@ -94,6 +89,9 @@ class InputTag extends HTMLElement{
     }
 
     showData(){
+        const values = this.data.join(',');
+        this.value = values;
+
         this.dataTagContainer.innerHTML = '';
 
         this.data.forEach((item, index) =>{
@@ -121,6 +119,15 @@ class InputTag extends HTMLElement{
         document.querySelectorAll('.data-tag a').forEach(item =>{
             item.addEventListener('click', this.closeButtonEvent);
         });
+    }
+
+    connectedCallback(){
+        if(this.value === null) return false;
+        if(this.value != ''){
+            const values = this.value.split(',');
+            this.data = [...values];
+            this.showData();
+        }
     }
     
 }
