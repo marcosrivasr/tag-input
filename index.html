@@ -8,67 +8,36 @@
         body{
             font-family: Arial, Helvetica, sans-serif;
         }
+
+        input-tag .tag-input-container{
+            border: solid 1px #ff0000 !important;
+        }
+
+        label{
+            display: block;
+        }
         
     </style>
 </head>
 <body>
-    <input-tag value="apple, banana" id="tag01"></input-tag>
-    <input type="text">
 
-    <!-- <div class="tag-input-container">
-        <div class="data-tag-container"></div>
-        <input type="text" class="tag-input">
-    </div> -->
+    <form action="">
+        <label for="name">Name</label>
+        <input type="text" name="name">
+
+        <label for="lastname">Last Name</label>
+        <input type="text" name="lastname">
+
+        <label for="name">Name</label>
+        <input-tag value="apple, banana" id="tag01" ></input-tag>
+    </form>
+    
+    <input type="text">
     
     <script src="input-tag-component.js"></script>
 
     <script>
-        /* let tag = document.querySelector('.tag-input');
-        let dataTagsContainer = document.querySelector('.data-tag-container');
-        let data = [];
-        tag.addEventListener('keyup', e=>{
-            if(e.key == 'Enter' && !exists(tag.value)){
-                data.push(tag.value);
-                tag.value = '';
-                showData();
-            }
-        });
-
-        tag.addEventListener('keydown', e=>{
-
-            if(e.key == 'Backspace' && tag.value == '' && data.length > 0){
-                console.log('lol');
-                data.splice(-1,1);
-                showData();
-            }
-        });
-
-        function exists(value){
-            if(data.length === 0) return false;
-            const res = data.filter(item => {
-                return item == value
-            });
-
-            return res.length > 0;
-        }
-
-        function showData(){
-            dataTagsContainer.innerHTML = '';
-            data.forEach((item, index) =>{
-                dataTagsContainer.innerHTML += `<div class="data-tag" data-id="${index}">${item}<a>x</a></div>`; 
-            });
-
-            document.querySelectorAll('.data-tag a').forEach(item =>{
-                item.addEventListener('click', closeButtonEvent);
-            });
-        }
-
-        function closeButtonEvent(e){
-            const id = e.target.parentNode.getAttribute('data-id');
-            data.splice(id, 1);
-            showData();
-            tag.focus();
-        } */
+        
     </script>
 </body>
 </html>
