@@ -5,6 +5,13 @@ class InputTag extends HTMLElement{
         this.template = document.createElement('template');
         this.template.innerHTML = `
         <style>
+        :host{
+            display: inline-block;
+        }
+        
+        :host:focus, .focus{
+            outline: -webkit-focus-ring-color auto 1px;
+        }
         .tag-input-container{
             -webkit-writing-mode: horizontal-tb !important;
             text-rendering: auto;
@@ -24,10 +31,9 @@ class InputTag extends HTMLElement{
             font: 400 13.3333px Arial;
             padding: 1px 2px;
             border-width: 1px;
-            border-style: inset;
-            border-color: -internal-light-dark-color(rgb(118, 118, 118), rgb(195, 195, 195));
+            
             border-image: initial;
-            width: 400px;
+            width: 250px;
         }
         .tag-input-container .data-tag-container{
             display: inline-block;
@@ -57,6 +63,7 @@ class InputTag extends HTMLElement{
 
         
         .tag-input-container input{
+            background: transparent;
             font-size: 1em;
             border: 0;
             outline: none;
@@ -95,29 +102,49 @@ class InputTag extends HTMLElement{
             this.focus = 'tags';
         });
 
-
-        this.input.addEventListener('keyup', e =>{
-            const value = e.target.value.trim();
-
-            e.target.style.width = ((value.length + 1) * 12) + 'px';
-
-            if(e.key == 'Enter' && value != '' && !this.exists(value)){
-                
-                this.data.push(value);
-                e.target.value = '';
-                this.showData();
-                e.target.focus();
-            }
+        this.input.addEventListener('focus', e =>{
+            this.mainContainer.classList.add('focus');
+        });
+        this.input.addEventListener('focusout', e =>{
+            this.mainContainer.classList.remove('focus');
         });
 
-        this.input.addEventListener('keydown', e =>{
-            const value = e.target.value;
+        this.input.addEventListener('keyup', e =>{
+            console.log(e.target.selectionStart);
+            const value = e.target.value.trim();
+            const len = ((value.length + 3) * 12) + 'px';
+            e.target.style.width = len;
 
-            if(e.key == 'Backspace' && value == '' && this.data.length > 0){
+            if(e.key == 'Enter' && value.length > 0 && !this.exists(value)){
+                this.add(value, e);
+            } 
+        });
+
+
+        this.input.addEventListener('keydown', e =>{
+            const value = e.target.value.trim();
+
+            if(e.key === 'Tab' && value.length > 0){
+                e.preventDefault();
+                this.add(value, e);
+            }
+
+            if(e.key === 'Backspace' && value.length === 0 && this.data.length > 0){
                 this.remove(-1);
                 e.target.focus();
             }
         });
+    }
+    
+    add(value, e){
+        this.data.push(value);
+        this.showData();
+        e.target.value = '';
+        e.target.focus();
+    }
+
+    createUI(){
+        
     }
 
     set value(data){
@@ -145,7 +172,6 @@ class InputTag extends HTMLElement{
     showData(){
         const values = this.data.join(',');
         this.value = values;
-        //console.log(this.value);
 
         this.tags.innerHTML = '';
 
@@ -153,7 +179,6 @@ class InputTag extends HTMLElement{
 
          this.data.forEach((item, index) =>{
             const newTag = this.createTag(index, item);
-            //console.log(item.trim());
             this.mainContainer.append(newTag);
         });
 
