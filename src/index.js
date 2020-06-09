@@ -1,4 +1,3 @@
-
 class InputTag extends HTMLElement{
     constructor() {
         super();
@@ -74,6 +73,7 @@ class InputTag extends HTMLElement{
         }
         </style>
       `;
+      const el = this;
         this.data = [];
         this.focus = ''; 
         this.selected = undefined;     
@@ -94,6 +94,17 @@ class InputTag extends HTMLElement{
 
         shadowRoot.appendChild(this.mainContainer);
 
+        this.closest('form').addEventListener('submit', e =>{
+            e.preventDefault();
+            const form = e.target;
+            const hidden = document.createElement('input');
+            hidden.setAttribute('type', 'hidden');
+            hidden.setAttribute('name', el.getAttribute('name'));
+            hidden.value = el.value;
+            form.appendChild(hidden);
+            form.submit();
+        });
+
         this.mainContainer.addEventListener('click', e =>{
             this.input.focus();
         });
@@ -103,14 +114,14 @@ class InputTag extends HTMLElement{
         });
 
         this.input.addEventListener('focus', e =>{
-            this.mainContainer.classList.add('focus');
+            el.classList.add('focus');
         });
         this.input.addEventListener('focusout', e =>{
-            this.mainContainer.classList.remove('focus');
+            el.classList.remove('focus');
         });
 
         this.input.addEventListener('keyup', e =>{
-            console.log(e.target.selectionStart);
+//            console.log(e.target.selectionStart);
             const value = e.target.value.trim();
             const len = ((value.length + 3) * 12) + 'px';
             e.target.style.width = len;
