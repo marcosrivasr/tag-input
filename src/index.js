@@ -1,4 +1,5 @@
 class InputTag extends HTMLElement{
+
     constructor() {
         super();
         this.template = document.createElement('template');
@@ -232,7 +233,8 @@ class InputTag extends HTMLElement{
             this.data = [...values];
             this.showData();
         }
-    }
-    
+    }   
 }
+
+
 window.customElements.define('input-tag', InputTag);
