@@ -1,7 +1,11 @@
+import TagModel from './TagModel';
+
 class InputTag extends HTMLElement{
 
     constructor() {
         super();
+        this.tagModel = new TagModel();
+
         this.template = document.createElement('template');
         this.template.innerHTML = `
         <style>
@@ -74,38 +78,39 @@ class InputTag extends HTMLElement{
         }
         </style>
       `;
-      const el = this;
-        this.data = [];
+
+        const el = this; // it has the element reference
+        this.mainElement = el;
+        //this.data = [];
         this.focus = ''; 
-        this.selected = undefined;     
+        this.selected = undefined;    
+        
+
 
         const shadowRoot = this.attachShadow({mode: 'open'});
         shadowRoot.appendChild(this.template.content.cloneNode(true));
 
-        this.mainContainer = document.createElement('div');
-        this.tags = document.createElement('div');
-        this.input = document.createElement('input');
+        this.mainContainer  = document.createElement('div');    // main container for the HTML element
+        this.tags           = document.createElement('div');    // container for the tags UI
+        this.input          = document.createElement('input');  // input text to have user input
 
+        // set CSS classes to the elements
         this.mainContainer.setAttribute('class', 'tag-input-container');
         this.tags.setAttribute('class', 'data-tag-container');
         this.input.setAttribute('class', 'tag-input');
 
+        // attach input and tags container to main container
         this.mainContainer.appendChild(this.tags);
         this.mainContainer.appendChild(this.input);
 
+        // attach the main container to the shadow root element
         shadowRoot.appendChild(this.mainContainer);
 
+        // event for when the user submits the form
         this.closest('form').addEventListener('submit', e =>{
-            e.preventDefault();
-            const form = e.target;
-            const hidden = document.createElement('input');
-            hidden.setAttribute('type', 'hidden');
-            hidden.setAttribute('name', el.getAttribute('name'));
-            hidden.value = el.value;
-            form.appendChild(hidden);
-            form.submit();
+            this.handleSubmit(e, this.mainElement);
         });
-
+        
         this.mainContainer.addEventListener('click', e =>{
             this.input.focus();
         });
@@ -127,8 +132,13 @@ class InputTag extends HTMLElement{
             const len = ((value.length + 3) * 12) + 'px';
             e.target.style.width = len;
 
-            if(e.key == 'Enter' && value.length > 0 && !this.exists(value)){
-                this.add(value, e);
+            if(e.key == 'Enter' && value.length > 0 && !this.tagModel.exists(value)){
+                //this.add(value, e);
+                this.tagModel.add(value, () =>{
+                    this.showData();
+                    e.target.value = '';
+                    e.target.focus();
+                });
             } 
         });
 
@@ -138,7 +148,12 @@ class InputTag extends HTMLElement{
 
             if(e.key === 'Tab' && value.length > 0){
                 e.preventDefault();
-                this.add(value, e);
+                //this.add(value, e);
+                this.tagModel.add(value, () =>{
+                    this.showData();
+                    e.target.value = '';
+                    e.target.focus();
+                });
             }
 
             if(e.key === 'Backspace' && value.length === 0 && this.data.length > 0){
@@ -147,13 +162,24 @@ class InputTag extends HTMLElement{
             }
         });
     }
+
+    handleSubmit(e, element){
+        e.preventDefault();
+        const form = e.target;
+        const hidden = document.createElement('input');
+        hidden.setAttribute('type', 'hidden');
+        hidden.setAttribute('name', element.getAttribute('name'));
+        hidden.value = element.value;
+        form.appendChild(hidden);
+        form.submit();
+    }
     
-    add(value, e){
+    /* add(value, e){
         this.data.push(value);
         this.showData();
         e.target.value = '';
         e.target.focus();
-    }
+    } */
 
     createUI(){
         
@@ -172,24 +198,25 @@ class InputTag extends HTMLElement{
         this.showData();
     }
 
-    exists(value){
+/*     exists(value){
         if(this.data.length === 0) return false;
         const res = this.data.filter(item => {
             return item == value
         });
 
         return res.length > 0;
-    }
+    } */
 
     showData(){
-        const values = this.data.join(',');
+        //const values = this.data.join(',');
+        const values = this.tagModel.join(',');
         this.value = values;
 
         this.tags.innerHTML = '';
 
         this.mainContainer.innerHTML='';
 
-         this.data.forEach((item, index) =>{
+        this.tagModel.getAll().forEach((item, index) =>{
             const newTag = this.createTag(index, item);
             this.mainContainer.append(newTag);
         });
@@ -203,9 +230,9 @@ class InputTag extends HTMLElement{
     }
 
     createTag(index, text){
-        const dataTag = document.createElement('div');
-        const dataTagText = document.createTextNode(text);
-        const closeButton = document.createElement('a');
+        const dataTag       = document.createElement('div');
+        const dataTagText   = document.createTextNode(text);
+        const closeButton   = document.createElement('a');
 
         dataTag.setAttribute('data-id', index);
         dataTag.setAttribute('class', 'data-tag');
