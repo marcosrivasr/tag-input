@@ -9,8 +9,12 @@ export default class TagModel{
         callback();
     }
 
+    count(){
+        return this.items.length;
+    }
+
     remove(index, callback){
-        this.items.splice(index,1);
+        this.items.splice(index, 1);
         callback();
     }
 
@@ -20,6 +24,10 @@ export default class TagModel{
 
     join(character){
         return this.items.join(character);
+    }
+
+    createFrom(items){
+        this.items = [...items];
     }
 
     exists(item){

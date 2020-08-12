@@ -14,7 +14,7 @@ class InputTag extends HTMLElement{
         }
         
         :host:focus, .focus{
-            outline: -webkit-focus-ring-color auto 1px;
+            outline: -webkit-focus-ring-color auto 1px !important;
         }
         .tag-input-container{
             -webkit-writing-mode: horizontal-tb !important;
@@ -81,7 +81,6 @@ class InputTag extends HTMLElement{
 
         const el = this; // it has the element reference
         this.mainElement = el;
-        //this.data = [];
         this.focus = ''; 
         this.selected = undefined;    
         
@@ -113,6 +112,7 @@ class InputTag extends HTMLElement{
         
         this.mainContainer.addEventListener('click', e =>{
             this.input.focus();
+           
         });
 
         this.tags.addEventListener('click', e =>{
@@ -121,19 +121,19 @@ class InputTag extends HTMLElement{
 
         this.input.addEventListener('focus', e =>{
             el.classList.add('focus');
+            this.mainContainer.classList.add('focus');
         });
         this.input.addEventListener('focusout', e =>{
             el.classList.remove('focus');
+            this.mainContainer.classList.remove('focus');
         });
 
         this.input.addEventListener('keyup', e =>{
-//            console.log(e.target.selectionStart);
             const value = e.target.value.trim();
             const len = ((value.length + 3) * 12) + 'px';
             e.target.style.width = len;
 
             if(e.key == 'Enter' && value.length > 0 && !this.tagModel.exists(value)){
-                //this.add(value, e);
                 this.tagModel.add(value, () =>{
                     this.showData();
                     e.target.value = '';
@@ -146,9 +146,8 @@ class InputTag extends HTMLElement{
         this.input.addEventListener('keydown', e =>{
             const value = e.target.value.trim();
 
-            if(e.key === 'Tab' && value.length > 0){
+            if((e.key === 'Tab' || e.key === ',') && value.length > 0){
                 e.preventDefault();
-                //this.add(value, e);
                 this.tagModel.add(value, () =>{
                     this.showData();
                     e.target.value = '';
@@ -156,9 +155,11 @@ class InputTag extends HTMLElement{
                 });
             }
 
-            if(e.key === 'Backspace' && value.length === 0 && this.data.length > 0){
-                this.remove(-1);
-                e.target.focus();
+            if(e.key === 'Backspace' && value.length === 0 && this.tagModel.getAll().length > 0){
+                this.tagModel.remove(-1, () =>{
+                    this.showData();
+                    e.target.focus();
+                });
             }
         });
     }
@@ -172,17 +173,6 @@ class InputTag extends HTMLElement{
         hidden.value = element.value;
         form.appendChild(hidden);
         form.submit();
-    }
-    
-    /* add(value, e){
-        this.data.push(value);
-        this.showData();
-        e.target.value = '';
-        e.target.focus();
-    } */
-
-    createUI(){
-        
     }
 
     set value(data){
@@ -198,17 +188,7 @@ class InputTag extends HTMLElement{
         this.showData();
     }
 
-/*     exists(value){
-        if(this.data.length === 0) return false;
-        const res = this.data.filter(item => {
-            return item == value
-        });
-
-        return res.length > 0;
-    } */
-
     showData(){
-        //const values = this.data.join(',');
         const values = this.tagModel.join(',');
         this.value = values;
 
@@ -230,25 +210,20 @@ class InputTag extends HTMLElement{
     }
 
     createTag(index, text){
-        const dataTag       = document.createElement('div');
+        const dataTag       = createElement('div', {'data-id': index, 'class': 'data-tag'});
         const dataTagText   = document.createTextNode(text);
-        const closeButton   = document.createElement('a');
-
-        dataTag.setAttribute('data-id', index);
-        dataTag.setAttribute('class', 'data-tag');
-        closeButton.setAttribute('data-id', index);
-
-
+        const closeButton   = createElement('a', {'data-id': index});
+        
         closeButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 18 18" data-id=${index}><path data-id=${index} d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/></svg>`;
         closeButton.addEventListener('click', e =>{
             const id = e.target.getAttribute('data-id');
-            this.data.splice(id, 1);
-            this.showData();
-            this.input.focus();
+            this.tagModel.remove(id, () =>{
+                this.showData();
+                this.input.focus();
+            });
+            
         });
-
-        dataTag.appendChild(dataTagText);
-        dataTag.appendChild(closeButton);
+        appendElements(dataTag, [dataTagText, closeButton]);
         
         return dataTag;
     }
@@ -257,10 +232,29 @@ class InputTag extends HTMLElement{
         if(this.value === null) return false;
         if(this.value != ''){
             const values = this.value.split(',');
-            this.data = [...values];
+            this.tagModel.createFrom(values);
             this.showData();
         }
     }   
+}
+
+function createElement(tag, properties){
+    const element = document.createElement(tag);
+
+    const props = Object.keys(properties);
+
+
+    props.forEach(prop =>{
+        element.setAttribute(prop, properties[prop]);
+    });
+
+    return element;
+}
+
+function appendElements(parent, children){
+    children.forEach(child =>{
+        parent.appendChild(child);
+    });
 }
 
 
